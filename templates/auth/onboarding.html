@@ -1,0 +1,779 @@
+{% extends 'chat_base.html' %}
+
+{% block title %}Welcome to OpenMind - Let's Get Started{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Onboarding Specific Styles */
+    .onboarding-wrapper {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        background: linear-gradient(135deg, var(--light-bg) 0%, var(--primary) 50%, var(--secondary) 100%);
+    }
+
+    .onboarding-container {
+        max-width: 800px;
+        width: 100%;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(45, 90, 92, 0.15);
+        overflow: hidden;
+    }
+
+    .onboarding-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        padding: 2.5rem 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .onboarding-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: pulse 8s ease-in-out infinite;
+    }
+
+    .welcome-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        animation: wave 2s ease-in-out infinite;
+    }
+
+    @keyframes wave {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(20deg); }
+        75% { transform: rotate(-20deg); }
+    }
+
+    .onboarding-title {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .onboarding-subtitle {
+        font-size: 1.05rem;
+        color: var(--text-muted);
+        position: relative;
+        z-index: 1;
+    }
+
+    .onboarding-content {
+        padding: 2.5rem 2rem;
+    }
+
+    /* Progress Steps */
+    .progress-steps {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .progress-steps::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 25%;
+        right: 25%;
+        height: 2px;
+        background: #e5e7eb;
+        z-index: 0;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .step.active .step-circle {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--text-dark) 100%);
+        border-color: var(--primary-dark);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .step.completed .step-circle {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--text-dark);
+    }
+
+    .step-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .step.active .step-label {
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    /* Form Steps */
+    .form-step {
+        display: none;
+        animation: fadeInUp 0.5s ease;
+    }
+
+    .form-step.active {
+        display: block;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .step-content {
+        margin-bottom: 2rem;
+    }
+
+    .step-title {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .step-description {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+        font-size: 0.95rem;
+    }
+
+    .form-textarea {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-family: var(--font-primary);
+        transition: all 0.3s ease;
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-textarea:focus {
+        outline: none;
+        border-color: var(--primary-dark);
+        box-shadow: 0 0 0 4px rgba(164, 220, 217, 0.15);
+    }
+
+    .char-count {
+        text-align: right;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+
+    /* Checkbox Cards */
+    .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .checkbox-card {
+        position: relative;
+    }
+
+    .checkbox-card input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .checkbox-card label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1.5rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+        text-align: center;
+    }
+
+    .checkbox-card input[type="checkbox"]:checked + label {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(45, 90, 92, 0.15);
+    }
+
+    .checkbox-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .checkbox-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .checkbox-description {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+    }
+
+    /* Radio Cards */
+    .radio-grid {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .radio-card {
+        position: relative;
+    }
+
+    .radio-card input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .radio-card label {
+        display: flex;
+        align-items: center;
+        padding: 1.25rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .radio-card input[type="radio"]:checked + label {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        border-color: var(--primary-dark);
+        box-shadow: 0 4px 12px rgba(45, 90, 92, 0.15);
+    }
+
+    .radio-icon {
+        font-size: 2rem;
+        margin-right: 1rem;
+    }
+
+    .radio-content {
+        flex: 1;
+    }
+
+    .radio-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .radio-description {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        line-height: 1.4;
+    }
+
+    /* Navigation Buttons */
+    .form-navigation {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #f3f4f6;
+    }
+
+    .btn {
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: var(--font-heading);
+        border: none;
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: var(--text-dark);
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--text-dark) 100%);
+        color: white;
+        flex: 1;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(45, 90, 92, 0.3);
+    }
+
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Skip Link */
+    .skip-link {
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .skip-link a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+
+    .skip-link a:hover {
+        color: var(--text-dark);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .onboarding-wrapper {
+            padding: 1rem;
+        }
+
+        .onboarding-content {
+            padding: 2rem 1.5rem;
+        }
+
+        .checkbox-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .progress-steps {
+            display: none;
+        }
+
+        .form-navigation {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="onboarding-wrapper">
+    <div class="onboarding-container">
+        <!-- Header -->
+        <div class="onboarding-header">
+            <div class="welcome-icon">👋</div>
+            <h1 class="onboarding-title">Welcome to OpenMind, {{ user.first_name }}!</h1>
+            <p class="onboarding-subtitle">Let's personalize your mental wellness experience</p>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="onboarding-content">
+            <div class="progress-steps">
+                <div class="step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">About You</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Your Goals</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Preferences</div>
+                </div>
+            </div>
+
+            <!-- Onboarding Form -->
+            <form method="POST" action="{% url 'onboarding' %}" id="onboardingForm">
+                {% csrf_token %}
+
+                <!-- Step 1: About You -->
+                <div class="form-step active" data-step="1">
+                    <div class="step-content">
+                        <h2 class="step-title">Tell us a bit about yourself</h2>
+                        <p class="step-description">
+                            This helps us provide personalized support and resources tailored to your needs.
+                        </p>
+
+                        <div class="form-group">
+                            <label class="form-label" for="bio">
+                                Share a little about yourself (optional)
+                            </label>
+                            <textarea 
+                                id="bio" 
+                                name="bio" 
+                                class="form-textarea" 
+                                placeholder="What brings you to OpenMind? What are you hoping to achieve?"
+                                maxlength="500"
+                            ></textarea>
+                            <div class="char-count">
+                                <span id="charCount">0</span>/500 characters
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                What are your main concerns? (Select all that apply)
+                            </label>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-card">
+                                    <input type="checkbox" name="concerns" value="anxiety" id="concern_anxiety">
+                                    <label for="concern_anxiety">
+                                        <span class="checkbox-icon">😰</span>
+                                        <span class="checkbox-title">Anxiety</span>
+                                        <span class="checkbox-description">Worry, stress, panic</span>
+                                    </label>
+                                </div>
+                                <div class="checkbox-card">
+                                    <input type="checkbox" name="concerns" value="depression" id="concern_depression">
+                                    <label for="concern_depression">
+                                        <span class="checkbox-icon">😔</span>
+                                        <span class="checkbox-title">Depression</span>
+                                        <span class="checkbox-description">Low mood, sadness</span>
+                                    </label>
+                                </div>
+                                <div class="checkbox-card">
+                                    <input type="checkbox" name="concerns" value="stress" id="concern_stress">
+                                    <label for="concern_stress">
+                                        <span class="checkbox-icon">😫</span>
+                                        <span class="checkbox-title">Stress</span>
+                                        <span class="checkbox-description">Work, life pressure</span>
+                                    </label>
+                                </div>
+                                <div class="checkbox-card">
+                                    <input type="checkbox" name="concerns" value="relationships" id="concern_relationships">
+                                    <label for="concern_relationships">
+                                        <span class="checkbox-icon">💔</span>
+                                        <span class="checkbox-title">Relationships</span>
+                                        <span class="checkbox-description">Family, friends, partner</span>
+                                    </label>
+                                </div>
+                                <div class="checkbox-card">
+                                    <input type="checkbox" name="concerns" value="sleep" id="concern_sleep">
+                                    <label for="concern_sleep">
+                                        <span class="checkbox-icon">😴</span>
+                                        <span class="checkbox-title">Sleep Issues</span>
+                                        <span class="checkbox-description">Insomnia, poor sleep</span>
+                                    </label>
+                                </div>
+                                <div class="checkbox-card">
+                                    <input type="checkbox" name="concerns" value="self_esteem" id="concern_self_esteem">
+                                    <label for="concern_self_esteem">
+                                        <span class="checkbox-icon">🪞</span>
+                                        <span class="checkbox-title">Self-Esteem</span>
+                                        <span class="checkbox-description">Confidence, self-worth</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-secondary" disabled>Previous</button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Your Goals -->
+                <div class="form-step" data-step="2">
+                    <div class="step-content">
+                        <h2 class="step-title">What are your wellness goals?</h2>
+                        <p class="step-description">
+                            Help us understand what you want to achieve through OpenMind.
+                        </p>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Select your primary goals (Choose up to 3)
+                            </label>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-card">
+                                    <input type="checkbox" name="goals" value="reduce_anxiety" id="goal_anxiety">
+                                    <label for="goal_anxiety">
+                                        <span class="checkbox-icon">🧘</span>
+                                        <span class="checkbox-title">Reduce Anxiety</span>
+                                        <span class="checkbox-description">Feel calmer</span>
+                                    </label>
+                                </div>
+                                <div class="checkbox-card">
+                                    <input type="checkbox" name="goals" value="improve_mood" id="goal_mood">
+                                    <label for="goal_mood">
+                                        <span class="checkbox-icon">😊</span>
+                                        <span class="checkbox-title">Improve Mood</span>
+                                        <span class="checkbox-description">Feel happier</span>
+                                    </label>
+                                </div>
+                                <div class="checkbox-card">
+                                    <input type="checkbox" name="goals" value="better_sleep" id="goal_sleep">
+                                    <label for="goal_sleep">
+                                        <span class="checkbox-icon">💤</span>
+                                        <span class="checkbox-title">Better Sleep</span>
+                                        <span class="checkbox-description">Rest well</span>
+                                    </label>
+                                </div>
+                                <div class="checkbox-card">
+                                    <input type="checkbox" name="goals" value="manage_stress" id="goal_stress">
+                                    <label for="goal_stress">
+                                        <span class="checkbox-icon">🎯</span>
+                                        <span class="checkbox-title">Manage Stress</span>
+                                        <span class="checkbox-description">Stay balanced</span>
+                                    </label>
+                                </div>
+                                <div class="checkbox-card">
+                                    <input type="checkbox" name="goals" value="build_confidence" id="goal_confidence">
+                                    <label for="goal_confidence">
+                                        <span class="checkbox-icon">💪</span>
+                                        <span class="checkbox-title">Build Confidence</span>
+                                        <span class="checkbox-description">Feel stronger</span>
+                                    </label>
+                                </div>
+                                <div class="checkbox-card">
+                                    <input type="checkbox" name="goals" value="connect_better" id="goal_connect">
+                                    <label for="goal_connect">
+                                        <span class="checkbox-icon">🤝</span>
+                                        <span class="checkbox-title">Better Relationships</span>
+                                        <span class="checkbox-description">Connect deeply</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep()">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Preferences -->
+                <div class="form-step" data-step="3">
+                    <div class="step-content">
+                        <h2 class="step-title">How would you like to connect?</h2>
+                        <p class="step-description">
+                            Choose your preferred way to engage with OpenMind.
+                        </p>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Preferred communication method
+                            </label>
+                            <div class="radio-grid">
+                                <div class="radio-card">
+                                    <input type="radio" name="communication" value="chat" id="comm_chat" checked>
+                                    <label for="comm_chat">
+                                        <span class="radio-icon">💬</span>
+                                        <div class="radio-content">
+                                            <div class="radio-title">AI Chat Support</div>
+                                            <div class="radio-description">
+                                                Talk with our AI therapist anytime, get instant support and guidance
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="radio-card">
+                                    <input type="radio" name="communication" value="video" id="comm_video">
+                                    <label for="comm_video">
+                                        <span class="radio-icon">📹</span>
+                                        <div class="radio-content">
+                                            <div class="radio-title">Video Sessions</div>
+                                            <div class="radio-description">
+                                                Connect face-to-face with professional therapists
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="radio-card">
+                                    <input type="radio" name="communication" value="audio" id="comm_audio">
+                                    <label for="comm_audio">
+                                        <span class="radio-icon">🎧</span>
+                                        <div class="radio-content">
+                                            <div class="radio-title">Audio Calls</div>
+                                            <div class="radio-description">
+                                                Voice-only sessions for added privacy
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="radio-card">
+                                    <input type="radio" name="communication" value="self_guided" id="comm_self">
+                                    <label for="comm_self">
+                                        <span class="radio-icon">📚</span>
+                                        <div class="radio-content">
+                                            <div class="radio-title">Self-Guided Resources</div>
+                                            <div class="radio-description">
+                                                Access articles, exercises, and tools at your own pace
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-navigation">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+                        <button type="submit" class="btn btn-primary">Complete Setup</button>
+                    </div>
+                </div>
+
+                <div class="skip-link">
+                    <a href="{% url 'dashboard' %}">Skip for now, I'll do this later</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentStep = 1;
+    const totalSteps = 3;
+
+    // Character counter for bio
+    const bioTextarea = document.getElementById('bio');
+    const charCount = document.getElementById('charCount');
+    
+    if (bioTextarea) {
+        bioTextarea.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+    }
+
+    // Goal selection limiter (max 3)
+    const goalCheckboxes = document.querySelectorAll('input[name="goals"]');
+    goalCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('input[name="goals"]:checked').length;
+            if (checkedCount > 3) {
+                this.checked = false;
+                alert('Please select up to 3 goals only.');
+            }
+        });
+    });
+
+    function nextStep() {
+        if (currentStep < totalSteps) {
+            // Hide current step
+            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('completed');
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+            
+            // Show next step
+            currentStep++;
+            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function prevStep() {
+        if (currentStep > 1) {
+            // Hide current step
+            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+            
+            // Show previous step
+            currentStep--;
+            document.querySelector(`.form-step[data-step="${currentStep}"]`).classList.add('active');
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('completed');
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    // Form validation before submit
+    document.getElementById('onboardingForm').addEventListener('submit', function(e) {
+        const concerns = document.querySelectorAll('input[name="concerns"]:checked');
+        const goals = document.querySelectorAll('input[name="goals"]:checked');
+        
+        if (concerns.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one concern to help us personalize your experience.');
+            currentStep = 1;
+            document.querySelector('.form-step.active').classList.remove('active');
+            document.querySelector('.form-step[data-step="1"]').classList.add('active');
+            return false;
+        }
+        
+        if (goals.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one goal for your wellness journey.');
+            currentStep = 2;
+            document.querySelector('.form-step.active').classList.remove('active');
+            document.querySelector('.form-step[data-step="2"]').classList.add('active');
+            return false;
+        }
+    });
+</script>
+{% endblock %}

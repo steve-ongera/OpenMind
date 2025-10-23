@@ -873,58 +873,6 @@ def crisis_support(request):
     return render(request, 'crisis_support.html', context)
 
 
-@login_required
-def dashboard(request):
-    """User dashboard view"""
-    user = request.user
-    
-    # Get user's recent activity
-    recent_mood_entries = MoodEntry.objects.filter(
-        user=user
-    ).order_by('-entry_date')[:7]
-    
-    recent_chat_sessions = ChatSession.objects.filter(
-        user=user
-    ).order_by('-started_at')[:5]
-    
-    upcoming_appointments = CounselingAppointment.objects.filter(
-        client=user,
-        scheduled_date__gte=timezone.now().date(),
-        status__in=['scheduled', 'confirmed']
-    ).order_by('scheduled_date', 'scheduled_time')[:5]
-    
-    # Get user's streak
-    from .models import UserStreak
-    try:
-        streak = UserStreak.objects.get(user=user)
-    except UserStreak.DoesNotExist:
-        streak = None
-    
-    # Calculate mood trend
-    if recent_mood_entries:
-        avg_mood = sum([entry.mood_score for entry in recent_mood_entries]) / len(recent_mood_entries)
-    else:
-        avg_mood = 0
-    
-    # Get recommendations
-    from .models import AIRecommendation
-    recommendations = AIRecommendation.objects.filter(
-        user=user,
-        viewed=False,
-        dismissed=False
-    ).order_by('-priority', '-created_at')[:5]
-    
-    context = {
-        'recent_mood_entries': recent_mood_entries,
-        'recent_chat_sessions': recent_chat_sessions,
-        'upcoming_appointments': upcoming_appointments,
-        'streak': streak,
-        'avg_mood': round(avg_mood, 1),
-        'recommendations': recommendations,
-    }
-    
-    return render(request, 'dashboard.html', context)
-
 
 def privacy_policy(request):
     """Privacy policy page"""

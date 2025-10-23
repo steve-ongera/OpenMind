@@ -33,7 +33,6 @@ urlpatterns = [
     path('crisis-support/', views.crisis_support, name='crisis_support'),
     
     # User Dashboard (requires authentication)
-    path('dashboard/', views.dashboard, name='dashboard'),
     path('quick-checkin/', views.quick_checkin, name='quick_checkin'),
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
     path('terms-of-service/', views.terms_of_service, name='terms_of_service'),
